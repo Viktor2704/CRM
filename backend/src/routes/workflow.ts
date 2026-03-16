@@ -82,11 +82,16 @@ export const registerWorkflowRoutes = (params) => {
     const workflowName = normalizeText(body.workflowName);
     const entityType = normalizeText(body.entityType);
 
+    const VALID_WORKFLOW_ENTITY_TYPES = new Set(['access_request', 'service_request', 'project', 'installation']);
+
     if (!workflowName) {
       throw new ApiError(400, 'VALIDATION_ERROR', 'Workflow name is required');
     }
     if (!entityType) {
       throw new ApiError(400, 'VALIDATION_ERROR', 'Entity type is required');
+    }
+    if (!VALID_WORKFLOW_ENTITY_TYPES.has(entityType)) {
+      throw new ApiError(400, 'VALIDATION_ERROR', `Invalid entity type: ${entityType}`);
     }
 
     // Get template

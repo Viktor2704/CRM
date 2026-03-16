@@ -10,11 +10,14 @@ export const verifyPassword = async (hash, plainText) => {
 };
 export const signAccessToken = (payload) => {
     return jwt.sign(payload, appConfig.jwtAccessSecret, {
+        algorithm: 'HS256',
         expiresIn: appConfig.accessTokenTtlSeconds,
     });
 };
 export const verifyAccessToken = (token) => {
-    return jwt.verify(token, appConfig.jwtAccessSecret);
+    return jwt.verify(token, appConfig.jwtAccessSecret, {
+        algorithms: ['HS256'],
+    });
 };
 export const createOpaqueToken = () => {
     return randomBytes(48).toString('base64url');

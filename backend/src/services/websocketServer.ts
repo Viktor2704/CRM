@@ -54,7 +54,8 @@ class WebSocketServer {
 
     private async authenticateSocket(socket: AuthenticatedSocket, next: (err?: Error) => void): Promise<void> {
         try {
-            const token = socket.handshake.auth.token || socket.handshake.headers.authorization?.replace('Bearer ', '');
+            const authHeader = socket.handshake.headers.authorization || '';
+            const token = socket.handshake.auth.token || (authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '');
 
             if (!token) {
                 return next(new Error('Authentication token required'));

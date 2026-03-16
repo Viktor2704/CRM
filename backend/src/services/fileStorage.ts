@@ -63,6 +63,9 @@ class LocalFileStorageProvider {
         this.rootDir = rootDir;
     }
     async save(input) {
+        if (!isAllowedMimeType(input.mimeType)) {
+            throw new ApiError(415, 'UNSUPPORTED_MEDIA_TYPE', `File type "${input.mimeType}" is not allowed`);
+        }
         const target = createStorageTarget(this.rootDir, input.fileName);
         await fs.mkdir(target.storageDir, { recursive: true });
         await fs.writeFile(target.fullPath, input.content, { flag: 'wx' });
@@ -76,6 +79,9 @@ class LocalFileStorageProvider {
         };
     }
     async saveStream(input) {
+        if (!isAllowedMimeType(input.mimeType)) {
+            throw new ApiError(415, 'UNSUPPORTED_MEDIA_TYPE', `File type "${input.mimeType}" is not allowed`);
+        }
         const target = createStorageTarget(this.rootDir, input.fileName);
         const maxBytes = appConfig.fileUploadMaxMb * 1024 * 1024;
         let sizeBytes = 0;

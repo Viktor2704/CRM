@@ -398,10 +398,12 @@ export const sendApprovalRequiredNotice = async (args: { to: string; userFullNam
 export const sendSystemEventNotice = async (args: { to: string; subject: string; body: string }) => {
     assertQueueableMailConfig();
     try {
-        const safeSubject = escapeHtml(args.subject);
+        // Sanitize subject to prevent email header injection (CRLF)
+        const sanitizedSubject = normalizeHeaderValue(args.subject);
+        const safeSubject = escapeHtml(sanitizedSubject);
         const html = buildHtmlEmail({
-            title: args.subject,
-            preheader: args.subject,
+            title: sanitizedSubject,
+            preheader: sanitizedSubject,
             body: `
               <h2 style="margin:0 0 16px;color:#1E293B;font-size:20px;font-weight:700;font-family:Arial,Helvetica,sans-serif;">${safeSubject}</h2>
               <div style="color:#475569;font-size:15px;line-height:1.7;white-space:pre-line;font-family:Arial,Helvetica,sans-serif;">${args.body.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
@@ -410,7 +412,7 @@ export const sendSystemEventNotice = async (args: { to: string; subject: string;
         await enqueueEmail({
             to: args.to,
             from: sender!,
-            subject: args.subject,
+            subject: sanitizedSubject,
             text: args.body,
             html,
         });

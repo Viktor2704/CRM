@@ -1,10 +1,19 @@
 import { Router } from 'express';
+import rateLimit from 'express-rate-limit';
 import { websocketServer } from '../services/websocketServer.js';
 import { realtimeNotificationService } from '../services/realtimeNotifications.js';
 import { requireAuth } from '../middleware/auth.js';
 import { z } from 'zod';
 
+const realtimeRateLimiter = rateLimit({
+    windowMs: 60 * 1000, // 1 minute
+    max: 30,
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
 const router = Router();
+router.use(realtimeRateLimiter);
 
 router.get('/status', requireAuth as any, (req: any, res: any) => {
     const userId = req.authUser!.id;
