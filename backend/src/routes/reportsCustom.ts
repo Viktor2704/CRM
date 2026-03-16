@@ -5,6 +5,15 @@ export const registerReportRoutes = (params) => {
 
     const ALLOWED_ROLES = new Set(['admin', 'manager', 'dispatcher', 'curator']);
 
+    const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+    const parseUuidParam = (value) => {
+        if (!value || !UUID_REGEX.test(value)) {
+            throw new ApiError(400, 'INVALID_ID', 'Invalid ID format — expected UUID');
+        }
+        return value;
+    };
+
     const requireReportAccess = (request, _response, next) => {
         const role = request.authUser?.role;
         if (!role || !ALLOWED_ROLES.has(role)) {
@@ -203,7 +212,7 @@ export const registerReportRoutes = (params) => {
     }));
 
     app.patch('/reports/scheduled/:id', requireAuth, requireReportAccess, asyncHandler(async (request, response) => {
-        const { id } = request.params;
+        const id = parseUuidParam(request.params.id);
         const { name, reportType, frequency, recipientEmail, filters, isActive } = request.body || {};
 
         const sets: string[] = [];
@@ -262,7 +271,7 @@ export const registerReportRoutes = (params) => {
     }));
 
     app.delete('/reports/scheduled/:id', requireAuth, requireReportAccess, asyncHandler(async (request, response) => {
-        const { id } = request.params;
+        const id = parseUuidParam(request.params.id);
         const sql = `
             UPDATE scheduled_reports
             SET deleted_at = now(), updated_at = now()
@@ -309,7 +318,7 @@ export const registerReportRoutes = (params) => {
     }));
 
     app.delete('/reports/templates/:id', requireAuth, requireReportAccess, asyncHandler(async (request, response) => {
-        const { id } = request.params;
+        const id = parseUuidParam(request.params.id);
         const sql = `
             UPDATE report_templates
             SET deleted_at = now()

@@ -35,21 +35,34 @@ const normalizeStorageKey = (value) => {
         return '';
     }
     let safeValue = decodedValue;
-    try {
-        safeValue = decodeURIComponent(decodedValue);
-    }
-    catch (_error) {
-        safeValue = decodedValue;
+    // Decode multiple times to prevent double-encoding bypass
+    for (let i = 0; i < 3; i++) {
+        try {
+            const decoded = decodeURIComponent(safeValue);
+            if (decoded === safeValue) break;
+            safeValue = decoded;
+        }
+        catch (_error) {
+            break;
+        }
     }
     safeValue = safeValue
         .replace(/\\/g, '/')
         .split('?')[0]
         .split('#')[0];
     const segments = safeValue.split('/').filter(Boolean);
-    if (segments.length === 0 || segments.some((segment) => segment === '.' || segment === '..')) {
+    // Block any traversal attempts including encoded variations
+    if (segments.length === 0 || segments.some((segment) =>
+        segment === '.' || segment === '..' || segment.includes('\0')
+    )) {
         return '';
     }
-    return segments.join('/');
+    // Final check: resolved path must not escape the base directory
+    const joined = segments.join('/');
+    if (joined.includes('..') || joined.includes('\0')) {
+        return '';
+    }
+    return joined;
 };
 
 export const extractStorageKeyFromFileUrl = (value) => {

@@ -3,6 +3,12 @@ import { USER_ROLES, USER_STATUSES } from './types.js';
 
 const uuid = z.string().uuid();
 
+// Shared password schema: min 12, max 256, must contain uppercase, lowercase, and digit
+const passwordField = z.string().min(12).max(256).refine(
+    (val) => /[a-z]/.test(val) && /[A-Z]/.test(val) && /\d/.test(val),
+    { message: 'Password must contain at least one uppercase letter, one lowercase letter, and one digit' }
+);
+
 const bindingsSchema = z.object({
     counterpartyId: uuid.nullable().optional(),
     contractIds: z.array(uuid).optional(),
@@ -15,7 +21,7 @@ const bindingsSchema = z.object({
 export const bootstrapAdminSchema = z.object({
     fullName: z.string().trim().min(1),
     email: z.string().email(),
-    password: z.string().min(12),
+    password: passwordField,
 });
 
 export const loginSchema = z.object({
@@ -38,7 +44,7 @@ export const passwordResetRequestSchema = z.object({
 
 export const passwordResetConfirmSchema = z.object({
     token: z.string().min(1),
-    password: z.string().min(12),
+    password: passwordField,
 });
 
 export const createUserSchema = z.object({
@@ -99,7 +105,7 @@ export const sendInviteSchema = z.object({
 
 export const acceptInviteSchema = z.object({
     token: z.string().min(1),
-    password: z.string().min(12),
+    password: passwordField,
 });
 
 export const auditQuerySchema = z.object({

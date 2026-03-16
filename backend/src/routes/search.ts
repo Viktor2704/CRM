@@ -31,7 +31,7 @@ export function registerSearchRoutes(params: {
         highlight: request.query.highlight,
       });
 
-      const user = (request as any).user;
+      const user = (request as any).authUser;
       const actorId = user?.id;
       const actorRole = user?.role;
 

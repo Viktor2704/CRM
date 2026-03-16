@@ -56,10 +56,10 @@ router.post('/notify', requireAuth as any, async (req: any, res: any) => {
 
     const schema = z.object({
         userId: z.number(),
-        type: z.string(),
-        title: z.string(),
-        message: z.string(),
-        data: z.any().optional(),
+        type: z.string().min(1).max(100),
+        title: z.string().min(1).max(500),
+        message: z.string().min(1).max(5000),
+        data: z.record(z.string(), z.union([z.string(), z.number(), z.boolean(), z.null()])).optional(),
         priority: z.enum(['low', 'normal', 'high', 'urgent']).optional(),
     });
 

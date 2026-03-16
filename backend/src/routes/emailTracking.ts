@@ -1,3 +1,4 @@
+import rateLimit from 'express-rate-limit';
 import {
   recordTrackingEvent,
   getEmailTrackingStats,
@@ -6,11 +7,19 @@ import {
   getTrackingAnalytics,
 } from '../services/emailTracking.js';
 
+// Rate limit public tracking endpoints to prevent enumeration
+const trackingRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 120,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 export const registerEmailTrackingRoutes = (params: any) => {
   const { app, requireAuth, requireAdminLike, asyncHandler } = params;
 
-  // Tracking pixel endpoint (public)
-  app.get('/api/email-tracking/pixel/:trackingId.png', asyncHandler(async (request: any, response: any) => {
+  // Tracking pixel endpoint (public, rate-limited)
+  app.get('/api/email-tracking/pixel/:trackingId.png', trackingRateLimiter, asyncHandler(async (request: any, response: any) => {
     const { trackingId } = request.params;
 
     // Record open event
@@ -37,8 +46,8 @@ export const registerEmailTrackingRoutes = (params: any) => {
     response.status(200).send(pixel);
   }));
 
-  // Click tracking endpoint (public)
-  app.get('/api/email-tracking/click/:trackingId/:encodedUrl', asyncHandler(async (request: any, response: any) => {
+  // Click tracking endpoint (public, rate-limited)
+  app.get('/api/email-tracking/click/:trackingId/:encodedUrl', trackingRateLimiter, asyncHandler(async (request: any, response: any) => {
     const { trackingId, encodedUrl } = request.params;
 
     try {

@@ -250,6 +250,23 @@ export const validateConfig = () => {
     if (appConfig.fileAllowedMimeTypes.length === 0) {
         throw new Error('FILE_ALLOWED_MIME_TYPES must contain at least one MIME rule');
     }
+    // Validate URL-type config values
+    for (const [label, urlValue] of [
+        ['APP_URL', appConfig.appUrl],
+        ['FRONTEND_URL', appConfig.frontendUrl],
+    ] as const) {
+        if (urlValue) {
+            try {
+                const parsed = new URL(urlValue);
+                if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+                    throw new Error(`${label} must use http or https protocol`);
+                }
+            } catch (err) {
+                if (err instanceof Error && err.message.includes('must use')) throw err;
+                throw new Error(`${label} is not a valid URL: ${urlValue}`);
+            }
+        }
+    }
     if (appConfig.mchsRegistryLookupTimeoutMs <= 0) {
         throw new Error('MCHS_REGISTRY_LOOKUP_TIMEOUT_MS must be greater than 0');
     }

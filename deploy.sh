@@ -20,6 +20,8 @@ echo ""
 echo "[2/5] Installing backend dependencies..."
 cd "$REPO_DIR/backend"
 npm ci --omit=dev
+echo "Running npm audit..."
+npm audit --omit=dev --audit-level=critical || echo "WARNING: npm audit found critical vulnerabilities"
 
 # 3. Build backend
 echo ""
