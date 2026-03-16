@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Новинжстрой">
+  <rect width="512" height="512" rx="96" fill="#DC2626" />
+  <path
+    d="M256 84l150 56v112c0 97-58 154-150 193-92-39-150-96-150-193V140l150-56z"
+    fill="#ffffff"
+    fill-opacity="0.18"
+  />
+  <path
+    d="M256 120l122 45v87c0 80-45 129-122 163-77-34-122-83-122-163v-87l122-45z"
+    fill="none"
+    stroke="#ffffff"
+    stroke-width="18"
+    stroke-linejoin="round"
+  />
+  <path
+    d="M186 336V176h34l86 102V176h34v160h-32l-88-104v104z"
+    fill="#ffffff"
+    stroke="#ffffff"
+    stroke-width="4"
+    stroke-linejoin="round"
+  />
+</svg>

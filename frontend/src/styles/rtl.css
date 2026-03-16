@@ -1,0 +1,299 @@
+/* RTL (Right-to-Left) Support Styles */
+
+/* Apply RTL direction to the entire document when RTL language is active */
+[dir="rtl"] {
+  direction: rtl;
+  text-align: right;
+}
+
+/* Mirror flex layouts for RTL */
+[dir="rtl"] .flex-row-reverse {
+  flex-direction: row;
+}
+
+[dir="rtl"] .flex-row {
+  flex-direction: row-reverse;
+}
+
+/* Adjust margins and paddings for RTL */
+[dir="rtl"] .ml-auto {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+[dir="rtl"] .mr-auto {
+  margin-right: 0;
+  margin-left: auto;
+}
+
+/* Mirror border radius for RTL */
+[dir="rtl"] .rounded-l-lg {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-top-right-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+}
+
+[dir="rtl"] .rounded-r-lg {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-top-left-radius: 0.5rem;
+  border-bottom-left-radius: 0.5rem;
+}
+
+/* Mirror border sides for RTL */
+[dir="rtl"] .border-l {
+  border-left: 0;
+  border-right: 1px solid;
+}
+
+[dir="rtl"] .border-r {
+  border-right: 0;
+  border-left: 1px solid;
+}
+
+[dir="rtl"] .border-l-2 {
+  border-left: 0;
+  border-right: 2px solid;
+}
+
+[dir="rtl"] .border-r-2 {
+  border-right: 0;
+  border-left: 2px solid;
+}
+
+/* Mirror positioning for RTL */
+[dir="rtl"] .left-0 {
+  left: auto;
+  right: 0;
+}
+
+[dir="rtl"] .right-0 {
+  right: auto;
+  left: 0;
+}
+
+/* Mirror text alignment for RTL */
+[dir="rtl"] .text-left {
+  text-align: right;
+}
+
+[dir="rtl"] .text-right {
+  text-align: left;
+}
+
+/* Mirror transforms for RTL */
+[dir="rtl"] .translate-x-full {
+  transform: translateX(-100%);
+}
+
+[dir="rtl"] .-translate-x-full {
+  transform: translateX(100%);
+}
+
+/* Mirror icons that should be flipped in RTL */
+[dir="rtl"] .rtl-mirror {
+  transform: scaleX(-1);
+}
+
+/* Specific component adjustments for RTL */
+
+/* Sidebar positioning */
+[dir="rtl"] .md\:pl-60 {
+  padding-left: 0;
+  padding-right: 15rem;
+}
+
+[dir="rtl"] aside {
+  left: auto;
+  right: 0;
+}
+
+/* Dropdown menus */
+[dir="rtl"] .absolute.right-0 {
+  right: auto;
+  left: 0;
+}
+
+[dir="rtl"] .absolute.left-0 {
+  left: auto;
+  right: 0;
+}
+
+/* Search input icons */
+[dir="rtl"] .absolute.left-3 {
+  left: auto;
+  right: 0.75rem;
+}
+
+[dir="rtl"] .pl-8 {
+  padding-left: 0.75rem;
+  padding-right: 2rem;
+}
+
+/* Navigation items with icons */
+[dir="rtl"] .gap-3 {
+  /* Flex gap works naturally in RTL */
+}
+
+/* Modal positioning */
+[dir="rtl"] .inset-0 {
+  /* Works naturally in RTL */
+}
+
+/* Toast notifications */
+[dir="rtl"] .top-4.right-4 {
+  right: auto;
+  left: 1rem;
+}
+
+/* Breadcrumbs */
+[dir="rtl"] .breadcrumb-separator::before {
+  content: "\\";
+  transform: scaleX(-1);
+}
+
+/* Tables */
+[dir="rtl"] table {
+  direction: rtl;
+}
+
+[dir="rtl"] th:first-child,
+[dir="rtl"] td:first-child {
+  text-align: right;
+}
+
+[dir="rtl"] th:last-child,
+[dir="rtl"] td:last-child {
+  text-align: left;
+}
+
+/* Forms */
+[dir="rtl"] input[type="checkbox"],
+[dir="rtl"] input[type="radio"] {
+  margin-left: 0.5rem;
+  margin-right: 0;
+}
+
+/* Scrollbars (for webkit browsers) */
+[dir="rtl"]::-webkit-scrollbar {
+  left: 0;
+  right: auto;
+}
+
+/* Animations that need RTL adjustment */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+[dir="rtl"] .animate-slide-in-right {
+  animation: slideInLeft 0.3s ease-out;
+}
+
+[dir="rtl"] .animate-slide-in-left {
+  animation: slideInRight 0.3s ease-out;
+}
+
+/* Mobile menu adjustments for RTL */
+[dir="rtl"] .mobile-menu {
+  left: auto;
+  right: 0;
+}
+
+/* Command palette adjustments */
+[dir="rtl"] .command-palette {
+  text-align: right;
+}
+
+/* Badge positioning */
+[dir="rtl"] .badge-top-right {
+  right: auto;
+  left: -0.5rem;
+}
+
+/* Calendar RTL support */
+[dir="rtl"] .calendar-grid {
+  direction: rtl;
+}
+
+[dir="rtl"] .calendar-day {
+  text-align: center;
+}
+
+/* Chart and graph RTL support */
+[dir="rtl"] .chart-container {
+  direction: ltr; /* Keep charts in LTR for consistency */
+}
+
+/* Code blocks should remain LTR */
+[dir="rtl"] pre,
+[dir="rtl"] code {
+  direction: ltr;
+  text-align: left;
+}
+
+/* Email addresses and URLs should remain LTR */
+[dir="rtl"] .email,
+[dir="rtl"] .url,
+[dir="rtl"] a[href^="mailto:"],
+[dir="rtl"] a[href^="http"] {
+  direction: ltr;
+  unicode-bidi: embed;
+}
+
+/* Numbers should maintain their direction */
+[dir="rtl"] .number {
+  direction: ltr;
+  unicode-bidi: embed;
+}
+
+/* Utility classes for RTL control */
+.ltr-content {
+  direction: ltr !important;
+  text-align: left !important;
+}
+
+.rtl-content {
+  direction: rtl !important;
+  text-align: right !important;
+}
+
+/* Force LTR for specific content types */
+.force-ltr {
+  direction: ltr;
+  text-align: left;
+}
+
+/* Bidirectional text support */
+.bidi-override {
+  unicode-bidi: bidi-override;
+}
+
+.bidi-embed {
+  unicode-bidi: embed;
+}
+
+/* RTL-specific font adjustments for Arabic */
+[dir="rtl"][lang="ar"] {
+  font-family: 'Segoe UI', 'Tahoma', 'Arial', sans-serif;
+  line-height: 1.8; /* Arabic text needs more line height */
+}
+
+/* Ensure proper text rendering for Arabic */
+[dir="rtl"][lang="ar"] * {
+  font-feature-settings: "liga" 1, "calt" 1;
+}
