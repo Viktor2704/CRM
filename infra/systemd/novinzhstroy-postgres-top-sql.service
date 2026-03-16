@@ -1,0 +1,26 @@
+[Unit]
+Description=Novinzhstroy PostgreSQL top SQL snapshot
+Wants=postgresql.service
+After=postgresql.service
+ConditionPathExists=/etc/novinzhstroy/backend.env
+ConditionPathExists=/usr/local/sbin/novinzhstroy-postgres-top-sql.sh
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+Environment=BACKEND_ENV_FILE=/etc/novinzhstroy/backend.env
+Environment=OUTPUT_DIR=/var/log/novinzhstroy/postgres-top-sql
+Environment=RETENTION_DAYS=7
+Environment=TOP_LIMIT=20
+Environment=PG_SYSTEM_USER=postgres
+Environment=PGHOST=/var/run/postgresql
+Environment=PGPORT=5432
+ExecStart=/usr/local/sbin/novinzhstroy-postgres-top-sql.sh
+UMask=0027
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+LogsDirectory=novinzhstroy/postgres-top-sql
+LogsDirectoryMode=0750

@@ -1,0 +1,12 @@
+[Unit]
+Description=Daily Novinzhstroy PostgreSQL backup
+
+[Timer]
+OnCalendar=*-*-* 02:15:00 UTC
+Persistent=true
+RandomizedDelaySec=5m
+AccuracySec=1m
+Unit=novinzhstroy-postgres-backup.service
+
+[Install]
+WantedBy=timers.target

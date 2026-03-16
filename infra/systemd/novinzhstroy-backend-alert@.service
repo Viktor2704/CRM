@@ -1,0 +1,8 @@
+[Unit]
+Description=Novinzhstroy backend failure alert for %I
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/novinzhstroy-notify-telegram-alert.sh "%I"

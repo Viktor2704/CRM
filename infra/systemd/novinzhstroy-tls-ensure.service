@@ -1,0 +1,9 @@
+[Unit]
+Description=Ensure Novinzhstroy TLS certificate and HTTPS activation
+After=network-online.target nginx.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=-/etc/novinzhstroy/tls.env
+ExecStart=/usr/local/sbin/novinzhstroy-tls-ensure.sh

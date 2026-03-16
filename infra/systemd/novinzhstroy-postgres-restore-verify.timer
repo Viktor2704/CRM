@@ -1,0 +1,12 @@
+[Unit]
+Description=Weekly Novinzhstroy PostgreSQL restore verification
+
+[Timer]
+OnCalendar=Sun *-*-* 03:00:00 UTC
+Persistent=true
+RandomizedDelaySec=5m
+AccuracySec=1m
+Unit=novinzhstroy-postgres-restore-verify.service
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,28 @@
+# /etc/systemd/system/novinzhstroy-backend.service
+[Unit]
+Description=Novinzhstroy Backend API
+After=network-online.target
+Wants=network-online.target
+OnFailure=novinzhstroy-backend-alert@%p.service
+
+[Service]
+Type=simple
+User=novin
+Group=novin
+WorkingDirectory=/srv/novinzhstroy/current/backend
+EnvironmentFile=/etc/novinzhstroy/backend.env
+Environment=ALERT_LOG_FILE=/var/log/novinzhstroy-error-tracker/events.ndjson
+Environment=FILE_STORAGE_DIR=/srv/novinzhstroy/current/backend/.data/uploads
+ExecStart=/usr/bin/node dist/src/server.js
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+LogsDirectory=novinzhstroy-error-tracker
+ReadWritePaths=/srv/novinzhstroy/current/backend/.data/uploads /var/log/novinzhstroy-error-tracker
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target

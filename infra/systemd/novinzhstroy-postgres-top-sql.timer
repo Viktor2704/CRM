@@ -1,0 +1,12 @@
+[Unit]
+Description=Collect Novinzhstroy PostgreSQL top SQL snapshots
+
+[Timer]
+OnCalendar=*:0/15
+Persistent=true
+RandomizedDelaySec=2m
+AccuracySec=1m
+Unit=novinzhstroy-postgres-top-sql.service
+
+[Install]
+WantedBy=timers.target

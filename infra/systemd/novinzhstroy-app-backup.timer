@@ -1,0 +1,12 @@
+[Unit]
+Description=Daily Novinzhstroy application backup
+
+[Timer]
+OnCalendar=*-*-* 01:45:00 UTC
+Persistent=true
+RandomizedDelaySec=10m
+AccuracySec=1m
+Unit=novinzhstroy-app-backup.service
+
+[Install]
+WantedBy=timers.target

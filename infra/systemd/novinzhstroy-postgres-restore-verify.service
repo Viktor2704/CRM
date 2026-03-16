@@ -1,0 +1,23 @@
+[Unit]
+Description=Novinzhstroy PostgreSQL restore verification
+Wants=postgresql.service
+After=postgresql.service
+ConditionPathExists=/etc/novinzhstroy/backend.env
+ConditionPathExists=/usr/local/sbin/novinzhstroy-postgres-restore-verify.sh
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+Environment=BACKEND_ENV_FILE=/etc/novinzhstroy/backend.env
+Environment=BACKUP_DIR=/var/backups/postgres
+Environment=VERIFY_DB=novinzhstroy_restore_verify
+Environment=PG_SYSTEM_USER=postgres
+Environment=PGHOST=/var/run/postgresql
+Environment=PGPORT=5432
+ExecStart=/usr/local/sbin/novinzhstroy-postgres-restore-verify.sh
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true

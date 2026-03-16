@@ -1,0 +1,21 @@
+[Unit]
+Description=Novinzhstroy nginx 5xx tracker
+After=network-online.target nginx.service
+Wants=network-online.target
+Requires=nginx.service
+
+[Service]
+Type=simple
+Environment=ALERT_LOG_FILE=/var/log/novinzhstroy-error-tracker/events.ndjson
+ExecStart=/usr/local/sbin/novinzhstroy-track-nginx-5xx.sh
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadOnlyPaths=/etc/novinzhstroy/backend.env /var/log/nginx
+ReadWritePaths=/run/novinzhstroy-alerts /var/log/novinzhstroy-error-tracker
+
+[Install]
+WantedBy=multi-user.target

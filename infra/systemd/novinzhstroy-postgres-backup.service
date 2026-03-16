@@ -1,0 +1,22 @@
+[Unit]
+Description=Novinzhstroy PostgreSQL backup
+Wants=postgresql.service
+After=postgresql.service
+ConditionPathExists=/etc/novinzhstroy/backend.env
+ConditionPathExists=/usr/local/sbin/novinzhstroy-postgres-backup.sh
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+Environment=BACKEND_ENV_FILE=/etc/novinzhstroy/backend.env
+Environment=BACKUP_DIR=/var/backups/postgres
+Environment=RETENTION_DAYS=14
+ExecStartPre=/usr/bin/install -d -m 0700 /var/backups/postgres
+ExecStart=/usr/local/sbin/novinzhstroy-postgres-backup.sh
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/backups

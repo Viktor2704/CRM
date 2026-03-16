@@ -1,0 +1,21 @@
+[Unit]
+Description=Novinzhstroy application backup
+ConditionPathExists=/usr/local/sbin/novinzhstroy-app-backup.sh
+ConditionPathExists=/srv/novinzhstroy/current
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+Environment=APP_ROOT=/srv/novinzhstroy
+Environment=BACKUP_ROOT=/srv/backups/novinzhstroy
+Environment=RETENTION_DAYS=7
+ExecStartPre=/usr/bin/install -d -m 0755 /srv/backups
+ExecStartPre=/usr/bin/install -d -m 0700 /srv/backups/novinzhstroy
+ExecStart=/usr/local/sbin/novinzhstroy-app-backup.sh
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/srv/backups
