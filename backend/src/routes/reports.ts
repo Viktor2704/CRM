@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import type { Request, Response } from 'express';
+import { z } from 'zod';
 import { asyncHandler } from '../helpers/asyncHandler.js';
 import { ApiError } from '../errors.js';
 import {
@@ -54,27 +55,51 @@ export const createReportsRouter = (params: {
     })
   );
 
+  // Schema for report config validation
+  const reportConfigSchema = z.object({
+    columns: z.array(z.object({
+      field: z.string().regex(/^[a-zA-Z_][a-zA-Z0-9_.]*$/),
+      label: z.string().max(200).optional(),
+      aggregate: z.enum(['count', 'sum', 'avg', 'min', 'max']).optional(),
+    })).min(1).max(50),
+    filters: z.array(z.object({
+      field: z.string().regex(/^[a-zA-Z_][a-zA-Z0-9_.]*$/),
+      operator: z.enum(['equals', 'not_equals', 'contains', 'in', 'not_in', 'greater_than', 'less_than', 'is_null', 'is_not_null']),
+      value: z.any().optional(),
+    })).max(20).optional(),
+    groupBy: z.array(z.string().regex(/^[a-zA-Z_][a-zA-Z0-9_.]*$/)).max(5).optional(),
+    orderBy: z.object({
+      field: z.string().regex(/^[a-zA-Z_][a-zA-Z0-9_.]*$/),
+      direction: z.enum(['asc', 'desc']).optional(),
+    }).optional(),
+    limit: z.number().int().min(1).max(10000).optional(),
+  });
+
+  const createReportSchema = z.object({
+    name: z.string().min(1).max(200),
+    description: z.string().max(1000).optional(),
+    entityType: z.enum(['projects', 'installations', 'service_requests']),
+    config: reportConfigSchema,
+  });
+
   // Create report definition
   router.post(
     '/definitions',
     requireAuth,
     asyncHandler(async (req: Request, res: Response) => {
-      const { name, description, entityType, config } = req.body;
-
-      if (!name || !entityType || !config) {
-        throw new ApiError(422, 'VALIDATION_ERROR', 'Missing required fields');
+      const parsed = createReportSchema.safeParse(req.body);
+      if (!parsed.success) {
+        throw new ApiError(422, 'VALIDATION_ERROR', `Invalid report definition: ${parsed.error.message}`);
       }
 
-      if (!['projects', 'installations', 'service_requests'].includes(entityType)) {
-        throw new ApiError(422, 'VALIDATION_ERROR', 'Invalid entity type');
-      }
+      const { name, description, entityType, config } = parsed.data;
 
       const definition = await createReportDefinition({
         name,
         description,
         entityType,
         config,
-        createdBy: req.authUser?.id || req.user?.id,
+        createdBy: (req as any).authUser?.id || (req as any).user?.id,
       });
 
       res.status(201).json(definition);
@@ -120,15 +145,18 @@ export const createReportsRouter = (params: {
     '/execute',
     requireAuth,
     asyncHandler(async (req: Request, res: Response) => {
-      const { entityType, config, format } = req.body;
+      const executeSchema = z.object({
+        entityType: z.enum(['projects', 'installations', 'service_requests']),
+        config: reportConfigSchema,
+        format: z.enum(['json', 'csv', 'excel']).optional(),
+      });
 
-      if (!entityType || !config) {
-        throw new ApiError(422, 'VALIDATION_ERROR', 'Missing required fields');
+      const parsed = executeSchema.safeParse(req.body);
+      if (!parsed.success) {
+        throw new ApiError(422, 'VALIDATION_ERROR', `Invalid report request: ${parsed.error.message}`);
       }
 
-      if (!['projects', 'installations', 'service_requests'].includes(entityType)) {
-        throw new ApiError(422, 'VALIDATION_ERROR', 'Invalid entity type');
-      }
+      const { entityType, config, format } = parsed.data;
 
       const startTime = Date.now();
       const data = await executeReport(entityType, config);

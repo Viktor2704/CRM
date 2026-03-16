@@ -1,11 +1,13 @@
 // Example: Integrating WebSocket notifications in a React component
+// NOTE: Access tokens should come from auth context (httpOnly cookies), NOT localStorage.
 
 import React, { useEffect, useState } from 'react';
 import { useRealtime, useRealtimeRoom, usePresence } from '../hooks/useRealtime';
+import { getAccessToken } from '../api/client';
 
 // Example 1: Basic notification display
 export function NotificationBell() {
-    const token = localStorage.getItem('accessToken') || undefined;
+    const token = getAccessToken() || undefined;
     const { isConnected, unreadCount, notifications: _notifications } = useRealtime(token, {
         onNotification: (notification) => {
             // Show toast notification
@@ -118,7 +120,7 @@ export function UserPresenceIndicator({ userId }: { userId: number }) {
 
 // Example 4: Activity feed component
 export function ActivityFeed() {
-    const token = localStorage.getItem('accessToken') || undefined;
+    const token = getAccessToken() || undefined;
     const { activityFeed } = useRealtime(token, {
         onActivityUpdate: (activity) => {
             console.log('New activity:', activity);
@@ -151,7 +153,7 @@ export function OnlineUsersList() {
         const fetchUsers = async () => {
             const response = await fetch('/api/users', {
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+                    'Authorization': `Bearer ${getAccessToken() || ''}`,
                 },
             });
             const allUsers = await response.json();
@@ -181,7 +183,7 @@ export function App() {
 
     useEffect(() => {
         // Get token from auth context or storage
-        const accessToken = localStorage.getItem('accessToken');
+        const accessToken = getAccessToken();
         setToken(accessToken);
     }, []);
 

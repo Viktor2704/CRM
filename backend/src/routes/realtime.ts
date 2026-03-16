@@ -48,7 +48,12 @@ router.post('/broadcast', requireAuth as any, async (req: any, res: any) => {
     res.json({ success: true });
 });
 
-router.post('/notify', requireAuth, async (req, res) => {
+router.post('/notify', requireAuth as any, async (req: any, res: any) => {
+    // Only admins and managers can send notifications to arbitrary users
+    if (req.authUser!.role !== 'admin' && req.authUser!.role !== 'manager') {
+        return res.status(403).json({ error: 'Admin or manager role is required to send notifications' });
+    }
+
     const schema = z.object({
         userId: z.number(),
         type: z.string(),

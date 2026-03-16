@@ -41,6 +41,10 @@ echo "[5/5] Deploying..."
 sudo rsync -av --delete \
   --exclude='node_modules' \
   --exclude='.data' \
+  --exclude='.env*' \
+  --exclude='*.key' \
+  --exclude='*.pem' \
+  --exclude='.git' \
   "$REPO_DIR/backend/" "$DEPLOY_DIR/backend/"
 
 # Install production deps in deploy dir

@@ -44,6 +44,18 @@ export const registerEmailTrackingRoutes = (params: any) => {
     try {
       const originalUrl = Buffer.from(encodedUrl, 'base64url').toString('utf-8');
 
+      // Validate URL to prevent open redirect attacks
+      let parsedUrl: URL;
+      try {
+        parsedUrl = new URL(originalUrl);
+      } catch {
+        return response.status(400).json({ error: 'Invalid URL format' });
+      }
+
+      if (parsedUrl.protocol !== 'https:' && parsedUrl.protocol !== 'http:') {
+        return response.status(400).json({ error: 'Invalid URL protocol' });
+      }
+
       // Record click event
       await recordTrackingEvent({
         trackingId,
