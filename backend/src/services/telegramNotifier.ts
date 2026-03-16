@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { appConfig } from '../config.js';
 import { dbQuery } from '../db.js';
+import { escapeHtml, isUuidValue, normalizeText } from '../helpers/normalize.js';
 import { filterNotificationRecipientIdsByEntityScope } from '../helpers/notificationRecipientScope.js';
 import { logger, serializeError } from '../logger.js';
 import { callLLM } from './aiService.js';
@@ -14,19 +15,9 @@ const TELEGRAM_FAILURE_ALERT_WINDOW_MS = 10 * 60 * 1000;
 const TELEGRAM_FAILURE_ALERT_THRESHOLD = 3;
 const TELEGRAM_QUEUE_BATCH_SIZE = 25;
 
-const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
 const failureTracker = new Map<string, number[]>();
 let lastFailureAlertAt = 0;
 
-const normalizeText = (value) => (typeof value === 'string' ? value.trim() : '');
-const isUuidValue = (value) => uuidPattern.test(value);
-const escapeHtml = (value) => String(value ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
 const toEntityKey = (entityId) => normalizeText(entityId).slice(0, 8);
 
 const sleep = (delayMs: number) => new Promise((resolve) => {

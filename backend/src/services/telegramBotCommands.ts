@@ -1,10 +1,8 @@
 import { dbQuery } from '../db.js';
+import { isUuidValue, normalizeText } from '../helpers/normalize.js';
 import { logger, serializeError } from '../logger.js';
 import { TelegramBotClient, TelegramMessage } from './telegramClient.js';
 import { appConfig } from '../config.js';
-
-const normalizeText = (value: unknown): string => (typeof value === 'string' ? value.trim() : '');
-const isUuidValue = (value: string): boolean => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 
 // Conversation state management
 type ConversationState = {

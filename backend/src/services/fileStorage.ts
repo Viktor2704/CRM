@@ -3,17 +3,12 @@ import { createWriteStream, promises as fs } from 'node:fs';
 import path from 'node:path';
 import { Transform } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
+import sanitize from 'sanitize-filename';
 import { appConfig } from '../config.js';
 import { ApiError } from '../errors.js';
-const sanitizeFileName = (fileName) => {
-    const normalized = fileName
-        .trim()
-        .replace(/[/\\?%*:|"<>]/g, '_')
-        .replace(/\s+/g, '_')
-        .replace(/_+/g, '_')
-        .replace(/^\.+/, '')
-        .slice(0, 120);
-    return normalized || 'file.bin';
+const sanitizeFileName = (fileName: string): string => {
+    const safe = sanitize(fileName).trim().slice(0, 120);
+    return safe || 'file.bin';
 };
 const toPosixPath = (value) => {
     return value.split(path.sep).join(path.posix.sep);

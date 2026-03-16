@@ -1,5 +1,6 @@
 import { appendFile } from 'node:fs/promises';
 import { appConfig } from './config.js';
+import { escapeHtml } from './helpers/normalize.js';
 import { logger, serializeError } from './logger.js';
 
 export type AlertInput = {
@@ -43,13 +44,6 @@ const shouldSkipByCooldown = (dedupeState: Map<string, number>, key: string, coo
     dedupeState.set(key, now);
     return false;
 };
-
-const escapeHtml = (value: unknown) => String(value ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
 
 const buildAlertPayload = (config: AlertConfig, input: AlertInput): AlertPayload => ({
     timestamp: new Date().toISOString(),

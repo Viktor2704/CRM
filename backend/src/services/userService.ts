@@ -1,5 +1,6 @@
 import { dbQuery, withTx } from '../db.js';
 import { ApiError, mapPgError } from '../errors.js';
+import { isUuidValue } from '../helpers/normalize.js';
 import { logger, serializeError } from '../logger.js';
 import { canSendEmails, sendSystemEventNotice } from './mailService.js';
 import { publishUserAuditEvent } from './userAuditEvents.js';
@@ -56,7 +57,6 @@ const normalizeText = (value, fallback = 'не указано') => {
 const asObject = (value) => {
     return value && typeof value === 'object' && !Array.isArray(value) ? value : {};
 };
-const isUuidValue = (value) => typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value.trim());
 const formatIsoDateTime = (value) => {
     if (!value) {
         return 'не указано';

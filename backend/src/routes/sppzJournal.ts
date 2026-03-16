@@ -1,5 +1,6 @@
 import { randomBytes, createHash } from 'node:crypto';
 import { join as pathJoin } from 'node:path';
+import { isUuidValue } from '../helpers/normalize.js';
 
 const STAFF_ROLES = new Set(['admin', 'manager', 'curator', 'dispatcher', 'executor', 'installer']);
 const ADMIN_LIKE_SPPZ_ROLES = new Set(['admin', 'manager']);
@@ -95,8 +96,6 @@ const ADMIN_ROLES = new Set(['admin']);
 
 const buildInspectorToken = () => randomBytes(32).toString('base64url');
 
-const isUuidValue = (value: unknown): value is string =>
-    typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
 
 const isEmailValue = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 

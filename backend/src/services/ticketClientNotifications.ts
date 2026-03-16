@@ -3,7 +3,7 @@ import { logger, serializeError } from '../logger.js';
 import { canSendEmails, smtpSendMail, sender } from './mailService.js';
 import { resolveRecipientForNotification } from './notificationAccessService.js';
 import { appConfig } from '../config.js';
-import { escapeHtml } from '../helpers/normalize.js';
+import { escapeHtml, isUuidValue } from '../helpers/normalize.js';
 import {
     wrapEmailHtml,
     emailButton,
@@ -30,8 +30,6 @@ const DIGEST_RETENTION_DAYS = 30;
 const EVENT_LOG_RETENTION_DAYS = 90;
 const DIGEST_RUNTIME_KEY_LAST_SLOT = 'ticket_client:last_digest_slot_key';
 const DIGEST_SCHEDULER_LOCK_KEY = 420260201;
-const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
 let digestSchedulerStarted = false;
 let digestFlushInProgress = false;
 let lastHousekeepingAtMs = 0;
@@ -174,7 +172,7 @@ const formatCount = (value) => {
     return '0';
 };
 
-const isUuidValue = (value) => uuidPattern.test(value);
+
 
 const safeJsonString = (value, fallback) => {
     try {
