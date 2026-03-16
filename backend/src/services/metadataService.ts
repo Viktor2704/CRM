@@ -34,8 +34,9 @@ import {
 } from '../metadata/fieldMetadata.js';
 import { dbQuery } from '../db.js';
 import { logger } from '../logger.js';
+import { appConfig } from '../config.js';
 
-const METADATA_DIR = process.env.METADATA_DIR || '/var/lib/novinzhstroy/metadata';
+const METADATA_DIR = appConfig.metadataDir;
 
 export class MetadataService {
   private entityCache = new Map<string, EntityMetadata>();

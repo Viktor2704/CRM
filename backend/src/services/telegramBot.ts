@@ -1258,7 +1258,7 @@ export const startTelegramBot = async () => {
     }
     startPromise = (async () => {
         // Check if webhook mode is enabled
-        const useWebhook = Boolean(process.env.TELEGRAM_WEBHOOK_URL);
+        const useWebhook = Boolean(appConfig.telegramWebhookUrl);
 
         const rawBot = new TelegramBotClient(appConfig.telegramBotToken, { polling: !useWebhook });
         const bot = createRateLimitedTelegramBot(rawBot) as TelegramBotClient;
@@ -1364,7 +1364,7 @@ export const startTelegramBot = async () => {
             logger.info('Telegram bot initialized', {
                 username: telegramBotUsername,
                 mode: webhookInitialized ? 'webhook' : 'polling',
-                webhookUrl: process.env.TELEGRAM_WEBHOOK_URL,
+                webhookUrl: appConfig.telegramWebhookUrl,
             });
         } else {
             logger.info('Telegram bot initialized', {

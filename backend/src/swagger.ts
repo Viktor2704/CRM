@@ -5,6 +5,7 @@ import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import yaml from 'js-yaml';
+import { logger } from './logger.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -70,10 +71,10 @@ export const setupSwagger = async (config: SwaggerConfig): Promise<void> => {
       res.send(openApiContent);
     });
 
-    console.log('✓ Swagger UI available at /api-docs');
-    console.log('✓ OpenAPI spec available at /api-docs.json and /api-docs.yaml');
+    logger.info('Swagger UI available at /api-docs');
+    logger.info('OpenAPI spec available at /api-docs.json and /api-docs.yaml');
   } catch (error) {
-    console.error('Failed to setup Swagger:', error);
+    logger.error('Failed to setup Swagger', { error });
     throw error;
   }
 };

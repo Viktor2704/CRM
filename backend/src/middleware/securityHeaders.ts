@@ -12,10 +12,17 @@ export const securityHeadersMiddleware = (
 ): void => {
   // Content Security Policy
   // Restricts resource loading to prevent XSS attacks
+  const isDev = process.env.NODE_ENV !== 'production';
+  const scriptSrc = isDev
+    ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'" // unsafe-inline/eval needed for React dev only
+    : "script-src 'self'";
+  const styleSrc = isDev
+    ? "style-src 'self' 'unsafe-inline'" // unsafe-inline needed for styled components in dev
+    : "style-src 'self'";
   const cspDirectives = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval'", // unsafe-inline/eval needed for React dev
-    "style-src 'self' 'unsafe-inline'", // unsafe-inline needed for styled components
+    scriptSrc,
+    styleSrc,
     "img-src 'self' data: blob: https:",
     "font-src 'self' data:",
     "connect-src 'self' " + appConfig.corsOrigins.join(' '),

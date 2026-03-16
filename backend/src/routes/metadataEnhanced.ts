@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { dbQuery } from '../db.js';
 import { z } from 'zod';
+import { logger, serializeError } from '../logger.js';
 
 const router = Router();
 
@@ -43,7 +44,7 @@ router.get('/metadata-enhanced/entities', async (req: any, res: any) => {
 
     res.json({ entities: result.rows });
   } catch (error) {
-    console.error('Error fetching entities:', error);
+    logger.error('Error fetching entities', { error: serializeError(error) });
     res.status(500).json({ error: 'Failed to fetch entities' });
   }
 });
@@ -63,7 +64,7 @@ router.get('/metadata-enhanced/entities/:entityType', async (req: any, res: any)
 
     res.json(entityResult.rows[0]);
   } catch (error) {
-    console.error('Error fetching entity:', error);
+    logger.error('Error fetching entity', { error: serializeError(error) });
     res.status(500).json({ error: 'Failed to fetch entity' });
   }
 });
@@ -124,7 +125,7 @@ router.get('/metadata-enhanced/fields', async (req, res) => {
       ungroupedFields,
     });
   } catch (error) {
-    console.error('Error fetching fields:', error);
+    logger.error('Error fetching fields', { error: serializeError(error) });
     res.status(500).json({ error: 'Failed to fetch fields' });
   }
 });
@@ -191,7 +192,7 @@ router.post('/metadata-enhanced/fields', async (req: any, res: any) => {
 
     res.status(201).json(result.rows[0]);
   } catch (error) {
-    console.error('Error creating field:', error);
+    logger.error('Error creating field', { error: serializeError(error) });
     if (error instanceof z.ZodError) {
       return res.status(400).json({ error: 'Validation error', details: error.issues });
     }
@@ -301,7 +302,7 @@ router.get('/metadata-enhanced/field-types', async (req, res) => {
 
     res.json({ fieldTypes });
   } catch (error) {
-    console.error('Error fetching field types:', error);
+    logger.error('Error fetching field types', { error: serializeError(error) });
     res.status(500).json({ error: 'Failed to fetch field types' });
   }
 });

@@ -38,6 +38,17 @@ export const sensitiveOperationRateLimiter = rateLimit({
   },
 });
 
+// File download rate limiter - 60 requests per 15 minutes per IP
+export const fileDownloadRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (_request, _response, _next) => {
+    throw new ApiError(429, 'DOWNLOAD_RATE_LIMIT_EXCEEDED', 'Too many file download requests, please try again later');
+  },
+});
+
 // File upload rate limiter - 10 uploads per 15 minutes per IP
 export const uploadRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes

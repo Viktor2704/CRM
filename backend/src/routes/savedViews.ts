@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { dbQuery } from '../db.js';
 import { z } from 'zod';
+import { logger, serializeError } from '../logger.js';
 
 const router = Router();
 
@@ -87,7 +88,7 @@ router.get('/saved-views', async (req, res) => {
 
     res.json({ views: result.rows });
   } catch (error) {
-    console.error('Error fetching saved views:', error);
+    logger.error('Error fetching saved views', { error: serializeError(error) });
     res.status(500).json({ error: 'Failed to fetch saved views' });
   }
 });
@@ -164,7 +165,7 @@ router.get('/saved-views/:id', async (req, res) => {
       columns: columnsResult.rows,
     });
   } catch (error) {
-    console.error('Error fetching saved view:', error);
+    logger.error('Error fetching saved view', { error: serializeError(error) });
     res.status(500).json({ error: 'Failed to fetch saved view' });
   }
 });
@@ -258,7 +259,7 @@ router.post('/saved-views', async (req, res) => {
       throw error;
     }
   } catch (error) {
-    console.error('Error creating saved view:', error);
+    logger.error('Error creating saved view', { error: serializeError(error) });
     if (error instanceof z.ZodError) {
       return res.status(400).json({ error: 'Validation error', details: error.issues });
     }
@@ -394,7 +395,7 @@ router.patch('/saved-views/:id', async (req, res) => {
       throw error;
     }
   } catch (error) {
-    console.error('Error updating saved view:', error);
+    logger.error('Error updating saved view', { error: serializeError(error) });
     if (error instanceof z.ZodError) {
       return res.status(400).json({ error: 'Validation error', details: error.issues });
     }
@@ -421,7 +422,7 @@ router.delete('/saved-views/:id', async (req, res) => {
 
     res.json({ success: true });
   } catch (error) {
-    console.error('Error deleting saved view:', error);
+    logger.error('Error deleting saved view', { error: serializeError(error) });
     res.status(500).json({ error: 'Failed to delete saved view' });
   }
 });
@@ -453,7 +454,7 @@ router.post('/saved-views/:id/share', async (req, res) => {
 
     res.json({ success: true });
   } catch (error) {
-    console.error('Error sharing view:', error);
+    logger.error('Error sharing view', { error: serializeError(error) });
     res.status(500).json({ error: 'Failed to share view' });
   }
 });
@@ -481,7 +482,7 @@ router.delete('/saved-views/:id/share/:sharedUserId', async (req, res) => {
 
     res.json({ success: true });
   } catch (error) {
-    console.error('Error unsharing view:', error);
+    logger.error('Error unsharing view', { error: serializeError(error) });
     res.status(500).json({ error: 'Failed to unshare view' });
   }
 });
