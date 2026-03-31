@@ -265,7 +265,7 @@ export const setWebhookSecret = (secret: string): void => {
 export const initializeWebhookMode = async (bot: TelegramBotClient): Promise<boolean> => {
     try {
         // Check if webhook URL is configured
-        const webhookUrl = process.env.TELEGRAM_WEBHOOK_URL;
+        const webhookUrl = appConfig.telegramWebhookUrl;
         if (!webhookUrl) {
             logger.warn('TELEGRAM_WEBHOOK_URL not configured, staying in polling mode');
             return false;
@@ -280,7 +280,7 @@ export const initializeWebhookMode = async (bot: TelegramBotClient): Promise<boo
         }
 
         // Set webhook
-        const secret = process.env.TELEGRAM_WEBHOOK_SECRET || generateWebhookSecret();
+        const secret = appConfig.telegramWebhookSecret || generateWebhookSecret();
         const success = await setWebhook(bot, webhookUrl, secret);
 
         if (success) {

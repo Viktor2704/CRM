@@ -372,15 +372,10 @@ export const refreshSession = async (args) => {
         }
         throw new ApiError(403, 'ACCOUNT_PENDING_APPROVAL', 'Account is pending admin approval');
     }
+    // Revoke old token BEFORE creating new session to prevent race condition
+    // where concurrent refresh requests could both succeed
+    await revokeRefreshTokenById(tokenRow.id, undefined as any);
     const session = await createSession(user, args.meta);
-    const newTokenHash = hashOpaqueToken(session.refreshToken);
-    const nextToken = await findRefreshTokenByHash(newTokenHash);
-    if (nextToken?.jti) {
-        await revokeRefreshTokenById(tokenRow.id, nextToken.jti);
-    }
-    else {
-        await revokeRefreshTokenById(tokenRow.id, undefined as any);
-    }
     return {
         accessToken: session.accessToken,
         expiresIn: session.expiresIn,

@@ -79,12 +79,25 @@ router.delete(
   })
 );
 
+// Allowed entity types for custom fields
+const ALLOWED_CUSTOM_FIELD_ENTITY_TYPES = new Set(['tenant', 'project', 'service_request', 'access_request', 'installation']);
+
 // Get custom field values for an entity
 router.get(
   '/values/:entityType/:entityId',
   requireAuth,
-  asyncHandler(async (request, response) => {
+  asyncHandler(async (request: any, response) => {
     const { entityType, entityId } = request.params;
+
+    if (!ALLOWED_CUSTOM_FIELD_ENTITY_TYPES.has(entityType)) {
+      throw new ApiError(400, 'INVALID_ENTITY_TYPE', 'Invalid entity type for custom fields');
+    }
+
+    // Validate entityId is a UUID to prevent injection
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(entityId)) {
+      throw new ApiError(400, 'INVALID_ID', 'Invalid entity ID format');
+    }
+
     const values = await getCustomFieldValues(entityType, entityId);
     response.status(200).json(values);
   })
@@ -95,8 +108,17 @@ router.put(
   '/values/:entityType/:entityId',
   requireAuth,
   requireAdminLike,
-  asyncHandler(async (request, response) => {
+  asyncHandler(async (request: any, response) => {
     const { entityType, entityId } = request.params;
+
+    if (!ALLOWED_CUSTOM_FIELD_ENTITY_TYPES.has(entityType)) {
+      throw new ApiError(400, 'INVALID_ENTITY_TYPE', 'Invalid entity type for custom fields');
+    }
+
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(entityId)) {
+      throw new ApiError(400, 'INVALID_ID', 'Invalid entity ID format');
+    }
+
     const values = request.body as Record<string, string | null>;
     await setCustomFieldValues(entityType, entityId, values);
     response.status(204).send();

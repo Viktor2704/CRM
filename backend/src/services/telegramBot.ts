@@ -3,6 +3,7 @@ import path from 'node:path';
 import { appConfig } from '../config.js';
 import { dbQuery } from '../db.js';
 import { appendMaintenancePlanActorScopeCondition, appendServiceRequestActorScopeCondition } from '../helpers/actorAccess.js';
+import { escapeHtml, isUuidValue, normalizeText } from '../helpers/normalize.js';
 import { maintenancePlanManageRoles, serviceRequestManageRoles, serviceRequestViewRoles } from '../helpers/roles.js';
 import { filterNotificationRecipientIdsByEntityScope } from '../helpers/notificationRecipientScope.js';
 import { logger, serializeError } from '../logger.js';
@@ -25,7 +26,6 @@ import {
 import { handleInlineQuery, handleChosenInlineResult, enableInlineMode } from './telegramInlineMode.js';
 import { initializeWebhookMode } from './telegramWebhooks.js';
 
-const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const ACTION_TTL_MS = 10 * 60 * 1000;
 const CHECKIN_LOCATION_TTL_MS = 2 * 60 * 1000;
 const CLEANUP_INTERVAL_MS = 5 * 60 * 1000;
@@ -83,14 +83,6 @@ const telegramBotDeps: {
     fetchImpl: (input, init) => fetch(input as any, init),
 };
 
-const normalizeText = (value) => (typeof value === 'string' ? value.trim() : '');
-const escapeHtml = (value) => String(value ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-const isUuidValue = (value) => uuidPattern.test(value);
 const nowMskLabel = () => new Date().toLocaleString('ru-RU', {
     timeZone: 'Europe/Moscow',
     hour: '2-digit',
@@ -1258,7 +1250,7 @@ export const startTelegramBot = async () => {
     }
     startPromise = (async () => {
         // Check if webhook mode is enabled
-        const useWebhook = Boolean(process.env.TELEGRAM_WEBHOOK_URL);
+        const useWebhook = Boolean(appConfig.telegramWebhookUrl);
 
         const rawBot = new TelegramBotClient(appConfig.telegramBotToken, { polling: !useWebhook });
         const bot = createRateLimitedTelegramBot(rawBot) as TelegramBotClient;
@@ -1364,7 +1356,7 @@ export const startTelegramBot = async () => {
             logger.info('Telegram bot initialized', {
                 username: telegramBotUsername,
                 mode: webhookInitialized ? 'webhook' : 'polling',
-                webhookUrl: process.env.TELEGRAM_WEBHOOK_URL,
+                webhookUrl: appConfig.telegramWebhookUrl,
             });
         } else {
             logger.info('Telegram bot initialized', {

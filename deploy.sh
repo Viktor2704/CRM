@@ -20,6 +20,8 @@ echo ""
 echo "[2/5] Installing backend dependencies..."
 cd "$REPO_DIR/backend"
 npm ci --omit=dev
+echo "Running npm audit..."
+npm audit --omit=dev --audit-level=critical || echo "WARNING: npm audit found critical vulnerabilities"
 
 # 3. Build backend
 echo ""
@@ -41,6 +43,10 @@ echo "[5/5] Deploying..."
 sudo rsync -av --delete \
   --exclude='node_modules' \
   --exclude='.data' \
+  --exclude='.env*' \
+  --exclude='*.key' \
+  --exclude='*.pem' \
+  --exclude='.git' \
   "$REPO_DIR/backend/" "$DEPLOY_DIR/backend/"
 
 # Install production deps in deploy dir

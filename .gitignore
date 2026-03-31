@@ -6,5 +6,12 @@ coverage/
 *.tsbuildinfo
 .env
 .env.*
+.env.local
+.env.*.local
 .data/
 *.log
+*.key
+*.pem
+.DS_Store
+*.swp
+*.swo

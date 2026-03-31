@@ -33,7 +33,7 @@ import { subscribeUserAuditEvent } from './services/userAuditEvents.js';
 import { publishNotificationEvent, subscribeNotificationEvent } from './services/notificationEvents.js';
 import { requireAdminLike, requireAuth, requireTenantPageAccess, requireUserPageAccess } from './middleware/auth.js';
 import { securityHeadersMiddleware } from './middleware/securityHeaders.js';
-import { apiRateLimiter, authRateLimiter, sensitiveOperationRateLimiter, uploadRateLimiter } from './middleware/rateLimiter.js';
+import { apiRateLimiter, authRateLimiter, sensitiveOperationRateLimiter, uploadRateLimiter, fileDownloadRateLimiter } from './middleware/rateLimiter.js';
 import { queryMetricsMiddleware } from './middleware/queryLogger.js';
 import { logAudit, createAuditEntry } from './services/auditLogService.js';
 import { acceptInviteSchema, auditQuerySchema, bootstrapAdminSchema, bulkUpsertTenantsSchema, createTenantSchema, createUserSchema, emailLoginConfirmSchema, emailLoginRequestSchema, listUsersQuerySchema, loginSchema, parseUuidPath, passwordResetConfirmSchema, passwordResetRequestSchema, sendInviteSchema, ticketClientEventSchema, updateUserSchema, } from './validators.js';
@@ -135,6 +135,9 @@ const isAllowedOrigin = (origin) => {
 };
 const requireCsrfToken = (request, _response, next) => {
     if (!appConfig.csrfProtectionEnabled) {
+        if (process.env.NODE_ENV === 'production') {
+            logger.warn('CSRF protection is DISABLED in production — this is a security risk');
+        }
         next();
         return;
     }
@@ -375,7 +378,7 @@ const aiRateLimitMiddleware = (request, _response, next) => {
     const existing = aiRequestTimestampsByUser.get(key) ?? [];
     const activeWindow = existing.filter((timestamp) => timestamp > oldestAllowed);
     if (activeWindow.length >= AI_RATE_LIMIT_MAX_REQUESTS) {
-        console.warn('[AI_RATE_LIMIT] user exceeded AI rate limit', {
+        logger.warn('User exceeded AI rate limit', {
             userId: key,
             path: request.path,
             method: request.method,
@@ -492,8 +495,8 @@ app.use((request, response, next) => {
     });
     next();
 });
-app.get(`${appConfig.filePublicBasePath}/*`, asyncHandler(sendProtectedStoredFile));
-app.head(`${appConfig.filePublicBasePath}/*`, asyncHandler(sendProtectedStoredFile));
+app.get(`${appConfig.filePublicBasePath}/*`, fileDownloadRateLimiter, asyncHandler(sendProtectedStoredFile));
+app.head(`${appConfig.filePublicBasePath}/*`, fileDownloadRateLimiter, asyncHandler(sendProtectedStoredFile));
 app.use('/ai', requireAuth, aiRateLimitMiddleware);
 registerHealthRoutes({
     app,

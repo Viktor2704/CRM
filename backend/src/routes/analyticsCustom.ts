@@ -11,9 +11,14 @@ export const registerAnalyticsRoutes = (params: any) => {
         next();
     };
 
+    const ALLOWED_DATE_COLUMNS = new Set(['created_at', 'updated_at', 'r.created_at', 'r.updated_at']);
+
     const buildDateFilter = (period: string | undefined, column: string): { clause: string; params: any[] } => {
         if (!period) return { clause: '', params: [] };
-        let interval = '';
+        // Validate column name against whitelist to prevent SQL injection
+        if (!ALLOWED_DATE_COLUMNS.has(column)) {
+            throw new ApiError(400, 'INVALID_COLUMN', `Column "${column}" is not allowed for date filtering`);
+        }
         switch (period) {
             case 'this_month':
                 return { clause: ` AND ${column} >= date_trunc('month', now())`, params: [] };

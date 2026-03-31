@@ -151,6 +151,18 @@ const executeSendEmailNode = async (
   }
 };
 
+// Allowed fields per entity type (whitelist to prevent SQL injection)
+const ALLOWED_UPDATE_FIELDS: Record<string, Set<string>> = {
+  access_request: new Set(['status', 'priority', 'assigned_to', 'notes', 'resolution']),
+  service_request: new Set(['status', 'priority', 'assigned_to', 'notes', 'resolution', 'category']),
+  project: new Set(['status', 'stage', 'priority', 'assigned_to', 'notes', 'deadline']),
+  installation: new Set(['status', 'stage', 'priority', 'assigned_to', 'notes', 'deadline']),
+};
+
+// Validate that a field name is a safe SQL identifier
+const isSafeFieldName = (field: string): boolean =>
+  /^[a-z][a-z0-9_]{0,62}$/.test(field);
+
 // Execute update_field node
 const executeUpdateFieldNode = async (
   node: WorkflowNode,
@@ -162,6 +174,16 @@ const executeUpdateFieldNode = async (
 
     if (!field) {
       throw new Error('Field name is required');
+    }
+
+    // Validate field name against whitelist to prevent SQL injection
+    if (!isSafeFieldName(field)) {
+      throw new Error(`Invalid field name format: ${field}`);
+    }
+
+    const allowedFields = ALLOWED_UPDATE_FIELDS[context.entityType];
+    if (!allowedFields || !allowedFields.has(field)) {
+      throw new Error(`Field "${field}" is not allowed for entity type "${context.entityType}"`);
     }
 
     const processedValue = typeof value === 'string'
@@ -181,6 +203,7 @@ const executeUpdateFieldNode = async (
       throw new Error(`Unknown entity type: ${context.entityType}`);
     }
 
+    // Field name is safe — validated against whitelist and regex above
     await dbQuery(
       `UPDATE ${tableName} SET ${field} = $1, updated_at = NOW() WHERE id = $2::uuid`,
       [processedValue, context.entityId]
@@ -209,6 +232,25 @@ const executeCallApiNode = async (
     }
 
     const processedUrl = replaceTemplateVariables(url, context);
+
+    // Validate URL to prevent SSRF attacks
+    let parsedUrl: URL;
+    try {
+      parsedUrl = new URL(processedUrl);
+    } catch {
+      throw new Error(`Invalid API URL: ${processedUrl}`);
+    }
+
+    // Only allow HTTPS (and HTTP for localhost in dev)
+    if (parsedUrl.protocol !== 'https:' && parsedUrl.protocol !== 'http:') {
+      throw new Error(`Unsupported protocol: ${parsedUrl.protocol}`);
+    }
+
+    // Block requests to internal/private networks
+    const blockedHosts = ['localhost', '127.0.0.1', '0.0.0.0', '[::1]', 'metadata.google.internal', '169.254.169.254'];
+    if (blockedHosts.includes(parsedUrl.hostname) || parsedUrl.hostname.startsWith('10.') || parsedUrl.hostname.startsWith('192.168.') || /^172\.(1[6-9]|2\d|3[01])\./.test(parsedUrl.hostname)) {
+      throw new Error('API calls to internal/private network addresses are not allowed');
+    }
     const processedBody = body ? replaceTemplateVariables(JSON.stringify(body), context) : undefined;
 
     const response = await fetch(processedUrl, {
@@ -252,16 +294,9 @@ const executeRunScriptNode = async (
       throw new Error('Script is required');
     }
 
-    // Create a safe execution context
-    const safeContext = {
-      entity: context.entityData,
-      trigger: context.triggerData,
-      variables: context.variables || {},
-    };
-
-    // Execute script in isolated context (simplified - in production use vm2 or similar)
-    const func = new Function('context', script);
-    const result = func(safeContext);
+    // Script execution is disabled for security reasons (RCE risk via new Function).
+    // To re-enable, use a sandboxed runtime like isolated-vm.
+    throw new Error('Script execution is disabled for security. Use isolated-vm or remove run_script nodes.');
 
     await logWorkflowStep(executionId, node.id, 'info', 'Script executed successfully', { result });
     return { success: true, result };

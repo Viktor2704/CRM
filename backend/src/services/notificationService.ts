@@ -12,8 +12,7 @@ import { publishNotificationEvent } from './notificationEvents.js';
 import { appConfig } from '../config.js';
 
 const resolveAppBaseUrl = () => {
-    const url = appConfig.appUrl || (process.env.FRONTEND_URL ?? '').replace(/\/$/, '');
-    return url;
+    return appConfig.appUrl || appConfig.frontendUrl;
 };
 
 export const dispatchServiceRequestCreationNotifications = async (request, serviceRequestRows) => {

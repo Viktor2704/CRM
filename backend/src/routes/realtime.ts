@@ -1,10 +1,19 @@
 import { Router } from 'express';
+import rateLimit from 'express-rate-limit';
 import { websocketServer } from '../services/websocketServer.js';
 import { realtimeNotificationService } from '../services/realtimeNotifications.js';
 import { requireAuth } from '../middleware/auth.js';
 import { z } from 'zod';
 
+const realtimeRateLimiter = rateLimit({
+    windowMs: 60 * 1000, // 1 minute
+    max: 30,
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
 const router = Router();
+router.use(realtimeRateLimiter);
 
 router.get('/status', requireAuth as any, (req: any, res: any) => {
     const userId = req.authUser!.id;
@@ -48,13 +57,18 @@ router.post('/broadcast', requireAuth as any, async (req: any, res: any) => {
     res.json({ success: true });
 });
 
-router.post('/notify', requireAuth, async (req, res) => {
+router.post('/notify', requireAuth as any, async (req: any, res: any) => {
+    // Only admins and managers can send notifications to arbitrary users
+    if (req.authUser!.role !== 'admin' && req.authUser!.role !== 'manager') {
+        return res.status(403).json({ error: 'Admin or manager role is required to send notifications' });
+    }
+
     const schema = z.object({
         userId: z.number(),
-        type: z.string(),
-        title: z.string(),
-        message: z.string(),
-        data: z.any().optional(),
+        type: z.string().min(1).max(100),
+        title: z.string().min(1).max(500),
+        message: z.string().min(1).max(5000),
+        data: z.record(z.string(), z.union([z.string(), z.number(), z.boolean(), z.null()])).optional(),
         priority: z.enum(['low', 'normal', 'high', 'urgent']).optional(),
     });
 
